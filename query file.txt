@@ -1,0 +1,151 @@
+-- Q1 to check null values
+SELECT * FROM `corona_v`
+where Province IS NULL
+      or `Country/Region` IS NULL
+      or Latitude IS NULL
+      or Longitude IS NULL
+      or Date IS NULL
+      or Confirmed IS NULL
+      or Deaths IS NULL
+      or Recovered IS NULL;
+-- Q2 Replace NULL with Zero
+UPDATE `corona_v` 
+SET 
+    Province = COALESCE(Province, 'NOT AVAILABLE'),
+    `Country_Region` = COALESCE(`Country_Region`, 'NOT AVAILABLE'),
+    Latitude = COALESCE(Latitude, 0.0),
+    Longitude = COALESCE(Longitude, 0.0),
+    Date_1 = COALESCE(Date_1, CURRENT_DATE),
+    Confirmed = COALESCE(Confirmed, 0),
+    Deaths = COALESCE(Deaths, 0),
+    Recovered = COALESCE(Recovered, 0);
+-- Q3 Check total number of rows
+SELECT count(*) as total_rows FROM corona_v;
+-- Q4  Check what is start_date and end_date
+SELECT min(Date) as start_date , max(Date) as end_date FROM corona_v;
+-- Q5 Number of month present in dataset
+select extract(Month from Date)as month_order , count(*) as Month_occurence from corona_v
+group by Month_order
+order by Month_order;
+-- Q6 Find monthly average for confirmed, deaths, recovered
+SELECT
+    EXTRACT (MONTH from Date) as month_no,
+    EXTRACT (YEAR from Date) as Year1,
+	ROUND (AVG(Confirmed), 2) AS avg_confirmed,
+ROUND (AVG (Deaths), 2) AS avg_deaths,
+ROUND (AVG (Recovered), 2) AS avg_recovered
+FROM corona_v
+GROUP BY Year, month_no
+ORDER BY Year, month_no;
+
+-- Q8  Find minimum values for confirmed, deaths, recovered per year
+SELECT
+           EXTRACT (Year) from Date as year,
+           Min (Confirmed) as min_confirmed_cases,
+           MIN (Deaths) as min_death_reported,
+           MIN (Recovered) as min_recover_data
+           FROM   corona_v
+           GROUP BY year
+           ORDER BY year;
+-- Q9 Find maximum values for confirmed, deaths, recovered per year
+SELECT
+           EXTRACT (Year) from Date as year,
+           Max (Confirmed) as max_confirmed_cases,
+           Max (Deaths) as max_death_reported,
+           Max (Recovered) as max_recover_data
+           FROM   corona_v
+           GROUP BY year
+           ORDER BY year;
+Q10 The total number of case of confirmed, deaths, recovered each month
+
+SELECT
+
+EXTRACT (MONTH) from Dateas month_no,
+
+EXTRACT (YEAR) from Date as year,
+
+SUM (Confirmed) as total_confirmed_cases,
+
+SUM (Deaths) as total_death_reported,
+
+SUM (Recovered) as total_recover_data
+
+FROM corona_v
+
+GROUP BY
+
+year, month_no
+
+ORDER BY
+
+year, month_no;
+Q11. Check how corona virus spread out with respect to confirmed case SELECT
+
+EXTRACT (MONTH) from Date as month_no,
+
+EXTRACT (YEAR) from Date as year, SUM (Confirmed) as total_confirmed_cases,
+
+SUM (Deaths) as total_death_reported,
+
+SUM (Recovered) as total_recover_data
+
+FROM corona_v
+
+GROUP BY year, month_no
+
+ORDER BY year, month_no;
+-- Q12. Check how corona virus spread out with respect to death case per month
+SELECT
+EXTRACT (MONTH) from Date as month_no,
+EXTRACT (YEAR) from Date as year, SUM (Deaths) as total_death_reported,
+ROUND (AVG (Deaths), 2) as avg_death_reported,
+ROUND (VARIANCE (Deaths), 2) as var_death_reported,
+ROUND (STDDEV (Deaths), 2) as std_death_reported
+FROM corona_v
+GROUP BY year, month_no
+Order by year, month_no;
+-- Q13 Check how corona virus spread out with respect to recovered case
+SELECT
+EXTRACT (MONTH) from Date as month_no,
+EXTRACT (YEAR) from Date as year, SUM (Recovered) as total_recover_data,
+ROUND (AVG (Recovered), 2) as avg_recover_data, ROUND (VARIANCE (Recovered), 2) as var_recover_data,
+ROUND (STDDEV (Recovered), 2) as std_recover_data
+FROM corona_v
+GROUP BY year, month_no
+Order by year, month_no;
+-- Q14 Find Country having highest number of the Confirmed case
+
+SELECT
+country_region as Country,
+SUM (Confirmed) as total_confirmed_cases
+FROM corona_v
+GROUP BY Country
+ORDER BY total_confirmed_cases DESC
+LIMIT 1;
+-- Q15 Find Country having lowest number of the death case
+
+WITH rankingCountry as (
+
+SELECT
+country_region as Country,
+SUM (Deaths) as total_death_reported, RANK() Over (ORDER by SUM (Deaths) ASC) as rank_no
+FROM corona_v
+GROUP BY Country)
+
+SELECT Country,
+total_death_reported
+FROM
+rankingCountry
+WHERE
+rank_no =1
+-- Q16 Find top 5 countries having highest recovered case
+
+SELECT 
+    country_region AS Country,
+    SUM(Recovered) AS total_recovered_data
+FROM
+    corona_v
+GROUP BY Country
+ORDER BY total_recovered_data DESC
+LIMIT 5;
+
